@@ -1,32 +1,49 @@
-# Define variáveis para facilitar a manutenção
+# Define o compilador
 CC = cl
-TARGET = meu_exemplo.exe
-SOURCES = meu_exemplo.c
-OBJECTS = $(SOURCES:.c=.obj)
 
-# Caminhos para a biblioteca BDWGC
+# --- VARIAVEIS DO PROJETO ---
+
+# Programa 1
+TARGET1 = meu_exemplo.exe
+SOURCES1 = meu_exemplo.c
+OBJECTS1 = $(SOURCES1:.c=.obj)
+
+# Programa 2
+TARGET2 = explicacao.exe
+SOURCES2 = explicacao.c
+OBJECTS2 = $(SOURCES2:.c=.obj)
+
+
+# Caminhos e bibliotecas compartilhadas
 GC_INCLUDE_DIR = C:\trabalho\gc-git\include
 GC_LIB_DIR = C:\trabalho\gc-git\out\Release
 GC_LIB = gc.lib
 
-# Opções do Compilador: /EHsc é uma boa prática, /c diz para apenas compilar (sem linkar)
+# Opções do Compilador e Linker
 CFLAGS = /EHsc /I $(GC_INCLUDE_DIR) /Zi
+LFLAGS = /link /LIBPATH:$(GC_LIB_DIR) $(GC_LIB)
+
 
 # --- REGRAS DE BUILD ---
 
-# Regra padrão: o que fazer quando digitamos "nmake"
-all: $(TARGET)
+# O alvo padrão "all" agora constrói os dois programas.
+# Se você digitar apenas "nmake", ele executará esta regra.
+all: $(TARGET1) $(TARGET2)
 
-# Regra para LINKAR o executável a partir dos arquivos objeto
-# Esta regra so E executada depois que os arquivos .obj estiverem prontos
-$(TARGET): $(OBJECTS)
-	$(CC) $(OBJECTS) /link /LIBPATH:$(GC_LIB_DIR) $(GC_LIB)
+# Regra para LINKAR o meu_exemplo.exe
+$(TARGET1): $(OBJECTS1)
+	$(CC) $(OBJECTS1) $(LFLAGS)
 
-# Regra para COMPILAR os arquivos .c em arquivos .obj
-# É uma regra genérica que ensina o nmake a transformar qualquer .c em um .obj
+#Regra para linkar o explicacao.exe
+
+$(TARGET2): $(OBJECTS2)
+    $(CC) $(OBJECTS2) /link /LIBPATH:$(GC_LIB_DIR) $(GC_LIB)
+
+# Regra genérica para COMPILAR qualquer arquivo .c em .obj
+# Não precisamos mudar nada aqui, ela serve para os dois!
 .c.obj:
 	$(CC) $(CFLAGS) /c $<
 
-# Regra para limpar os arquivos gerados
+# Regra "clean" atualizada para apagar os arquivos dos dois programas
 clean:
-	del *.obj *.exe *.pdb *.ilk /q
+	del *.obj $(TARGET1) $(TARGET2) *.pdb *.ilk /q
